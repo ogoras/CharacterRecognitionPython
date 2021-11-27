@@ -1,3 +1,5 @@
 /Source
-/.ipynb_checkpoints
+.ipynb_checkpoints/
 *.mkv
+bvlc_alexnet.npy
+.old/

@@ -32,8 +32,8 @@ GET /classify
 
 -----------------------------------------------
 * Rozwój modelu maszynowego
-+ poprawienie skuteczności
-+ podwójny transfer learning?
++ poprawienie skuteczności (Kuba)
++ podwójny transfer learning? (Kuba)
 
 -----------------------------------------------
 * Uwzględnianie kontekstu
@@ -42,11 +42,13 @@ GET /classify
 + uzwględnienie poprzedniego znaku
 + uwzględnienie względnego położenia
 
++ rozpoznawanie pojedynczych znaków na obrazie?
+
 -----------------------------------------------
 * Organizacja
-+ przeniesienie kodu z Jupyter Notebooków do skryptów
++ przeniesienie kodu z Jupyter Notebooków do skryptów (Kuba)
 + zbudowanie web service we Flasku
-+ zapisanie modelu do pliku
++ zapisanie modelu do pliku (Kuba)
 
 ------------------------------------------
 * Deadline'y raczej bardziej elastyczne

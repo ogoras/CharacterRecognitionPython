@@ -1,4 +1,4 @@
-# CharacterRecognitionPython
+# CharacterRecognition Python
 Python module for a character recognition software
 
 ## Useful links

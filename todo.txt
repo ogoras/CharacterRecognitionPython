@@ -53,8 +53,7 @@ POST /classify
 + zapisanie modelu do pliku (Kuba)
 
 ------------------------------------------
-* Deadline'y raczej bardziej elastyczne
+* W tej chwili deadline'y:
 
-I etap: styczeń-luty (akwizycja danych)
-
-II etap: maj-czerwiec (badanie skuteczności)
++ Używalny system - 15 marca
++ Dalszy rozwój systemu - potencjalnie nawet do czerwca

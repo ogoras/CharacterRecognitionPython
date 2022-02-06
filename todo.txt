@@ -1,6 +1,6 @@
 * Prosty webservice:
 
-GET /classify
+POST /classify
    request:
     {
         [ # pociagniecie 1

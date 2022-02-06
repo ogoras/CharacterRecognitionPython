@@ -3,25 +3,27 @@
 POST /classify
    request:
     {
-        [ # pociagniecie 1
-            [
-                x: 0.543
-                y: 0.431
+        "data" : [
+	    [ # pociagniecie 1
+                {
+                    x: 0.543
+                    y: 0.431
+                },
+                {
+                    x: 0.21
+                    y: 0.122
+                }
             ],
-            [
-                x: 0.21
-                y: 0.122
-            ]
-        ],
-        [ # pociagniecie 2
-            [
-                x: 0.543
-                y: 0.431
-            ],
-            [
-                x: 0.21
-                y: 0.122
-            ]
+            [ # pociagniecie 2
+                {
+                    x: 0.543
+                    y: 0.431
+                },
+                {
+                    x: 0.21
+                    y: 0.122
+                }
+	    ]
         ]
     }
     response:

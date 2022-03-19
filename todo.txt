@@ -34,8 +34,8 @@ POST /classify
 
 -----------------------------------------------
 * Rozwój modelu maszynowego
-+ poprawienie skuteczności (Kuba)
-+ podwójny transfer learning? (Kuba)
++ poprawienie skuteczności
++ podwójny transfer learning?
 
 -----------------------------------------------
 * Uwzględnianie kontekstu
@@ -48,12 +48,6 @@ POST /classify
 
 -----------------------------------------------
 * Organizacja
-+ przeniesienie kodu z Jupyter Notebooków do skryptów (Kuba)
++ przeniesienie kodu z Jupyter Notebooków do skryptów
 + zbudowanie web service we Flasku
-+ zapisanie modelu do pliku (Kuba)
-
-------------------------------------------
-* W tej chwili deadline'y:
-
-+ Używalny system - 15 marca
-+ Dalszy rozwój systemu - potencjalnie nawet do czerwca
++ zapisanie modelu do pliku

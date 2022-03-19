@@ -3,3 +3,4 @@
 *.mkv
 bvlc_alexnet.npy
 .old/
+data/images/**

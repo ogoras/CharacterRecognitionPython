@@ -92,7 +92,10 @@ def convert_directory(in_dir, out_dir, dirname):
         pass
     for filename in os.listdir(directory):
         out_filename = directory2 + "/" + filename
+        out_filename = out_filename[:-4] + ".jpg"
         filename = directory + "/" + filename
+        if os.path.exists(out_filename):
+            continue
         f = open(filename, "r")
         
         strokes = []
@@ -155,7 +158,7 @@ def convert_directory(in_dir, out_dir, dirname):
                     draw_dot(img, int(px[index]), int(py[index]))
         
         im = Image.fromarray(img)
-        im.save(out_filename[:-4] + ".jpg")
+        im.save(out_filename)
     print("Directory " + dirname + " finished conversion.")
 
 

@@ -62,6 +62,8 @@ parser.add_argument("--debug", "-d", help="debug mode",
     action="store_true")
 parser.add_argument("--analyze", "-a", help="analyze results",
     action="store_true")
+parser.add_argument("--output", "-o", help="output file",
+    default="models/model" + time.strftime("%Y%m%d-%H%M%S") + ".h5")
 args = parser.parse_args()
 
 dataset = list(dataset_options[args.dataset])
@@ -251,6 +253,9 @@ train_images_processed = np.array( train_images_processed )
 
 history = new_model_transfer.fit(datagen.flow(train_images_processed, train_labels, batch_size=16), epochs=args.epochs, validation_data=validation_ds,
           validation_freq=1)
+
+#save the model to the file
+new_model_transfer.save(args.output)
 
 if(args.analyze):
     f,ax = plt.subplots(1,2, dpi=150, figsize=(9,3))

@@ -195,3 +195,53 @@ def AlexNet():
 model = AlexNet()
 
 net_data = np.load(open("bvlc_alexnet.npy", "rb"), encoding="latin1", allow_pickle=True).item()
+
+model.get_layer('conv1').set_weights(net_data["conv1"])
+model.get_layer('conv2').set_weights(net_data["conv2"])
+model.get_layer('conv3').set_weights(net_data["conv3"])
+model.get_layer('conv4').set_weights(net_data["conv4"])
+model.get_layer('conv5').set_weights(net_data["conv5"])
+
+model.get_layer('fc6').set_weights(net_data["fc6"])
+model.get_layer('fc7').set_weights(net_data["fc7"])
+model.get_layer('fc8').set_weights(net_data["fc8"])
+
+new_model = tf.keras.models.Sequential(model.layers[:-5])
+new_model.summary()
+
+for l in new_model.layers:
+    l.trainable = False
+
+numClasses = np.unique(train_labels).shape[0]
+print_green("Number of classes: " + str(numClasses))
+
+i = 1
+layers = new_model.layers + [
+        keras.layers.Dense(500+35*i, activation='relu'),      
+        keras.layers.Dropout(0.2+0.23*np.random.uniform(0,1)),  
+        keras.layers.Dense(numClasses, activation='softmax')
+    ]
+    
+
+new_model_transfer = tf.keras.models.Sequential(layers)
+new_model_transfer.compile(loss='sparse_categorical_crossentropy', 
+                           optimizer=tf.optimizers.SGD(lr=0.005), 
+                           metrics=['accuracy'])
+new_model_transfer.summary()
+
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+#help(ImageDataGenerator)
+datagen = ImageDataGenerator(width_shift_range=0.1,
+                                   height_shift_range=0.1,
+                                   zoom_range=0.1
+                             )
+datagen.fit(train_images)
+
+train_images_processed = []
+for img, lbl in zip(train_images, train_labels):
+    i,l = process_images(img,lbl)
+    train_images_processed.append(i)
+train_images_processed = np.array( train_images_processed )
+
+history = new_model_transfer.fit(datagen.flow(train_images_processed, train_labels, batch_size=16), epochs=50, validation_data=validation_ds,
+          validation_freq=1)

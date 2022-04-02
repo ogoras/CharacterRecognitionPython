@@ -1,5 +1,14 @@
 from itertools import chain
 import argparse
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+import os
+import matplotlib.pyplot as plt
+import time
+from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
+import pandas as pd
+
 
 numbers = range(10)
 
@@ -88,3 +97,33 @@ def classno_to_charname(ind):
     else:
         return char
 
+def read_images(folder=dataset_folder):
+    from keras.preprocessing.image import load_img
+    from keras.preprocessing.image import img_to_array
+
+    images_list=[]
+    target_list=[]
+
+    for subfolder in os.listdir(folder):
+        for sub in dataset:
+            #if directory does not exist, continue
+            if not os.path.isdir(os.path.join(folder, subfolder, str(sub))):
+                continue
+            for im in next(os.walk(os.path.join(folder,subfolder,str(sub))))[2]:
+                # load the image
+                img = load_img(os.path.join(folder,subfolder,str(sub),im))
+                # print("Original:", type(img))
+
+                # convert to numpy array
+                img_array = img_to_array(img)
+                # print(img_array.shape)
+                images_list.append(img_array)
+                target_list.append(list(dataset).index(sub))
+
+    images = np.array(images_list)
+    target = np.array(target_list)
+    return images, target
+
+images, labels = read_images()
+
+print(str(images.shape[0]) + " images loaded")

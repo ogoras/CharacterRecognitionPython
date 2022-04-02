@@ -8,7 +8,11 @@ import matplotlib.pyplot as plt
 import time
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
+#print in green
+def print_green(text):
+    print("\033[92m", text, "\033[0m")
 
 numbers = range(10)
 
@@ -126,4 +130,68 @@ def read_images(folder=dataset_folder):
 
 images, labels = read_images()
 
-print(str(images.shape[0]) + " images loaded")
+print_green(str(images.shape[0]) + " images loaded")
+
+from sklearn.model_selection import train_test_split
+
+train_images, test_images, train_labels, test_labels = train_test_split(images, labels, test_size=0.2)
+train_images, validation_images, train_labels, validation_labels = train_test_split(train_images, train_labels, test_size=0.2)
+
+train_ds = tf.data.Dataset.from_tensor_slices( (train_images, train_labels) )
+test_ds =  tf.data.Dataset.from_tensor_slices( (test_images, test_labels) )
+validation_ds =  tf.data.Dataset.from_tensor_slices( (validation_images, validation_labels) )
+
+train_ds_size = tf.data.experimental.cardinality(train_ds).numpy()
+test_ds_size = tf.data.experimental.cardinality(test_ds).numpy()
+validation_ds_size = tf.data.experimental.cardinality(validation_ds).numpy()
+
+print_green(f"Training data size: {train_ds_size}")
+print_green(f"Test data size: {test_ds_size}")
+print_green(f"Validation data size: {validation_ds_size}")
+
+def process_images(image, label):
+    image = tf.image.per_image_standardization(image)
+    image = tf.image.resize(image, [227,227] )
+    return image, label
+
+train_ds = (train_ds
+            .map(process_images)
+            .shuffle(buffer_size=train_ds_size)
+            .batch(batch_size=32, drop_remainder=True))
+test_ds = (test_ds
+            .map(process_images)
+            .shuffle(buffer_size=test_ds_size)
+            .batch(batch_size=32, drop_remainder=True))
+validation_ds = (validation_ds
+            .map(process_images)
+            .shuffle(buffer_size=validation_ds_size)
+            .batch(batch_size=32, drop_remainder=True))
+
+def AlexNet():
+    NUMBER_OF_CLASSES = 1000
+    return keras.models.Sequential([
+        keras.layers.Conv2D(name='conv1', filters=96, kernel_size=(11,11), strides=(4,4), activation='relu', input_shape=(227,227,3)),
+        keras.layers.BatchNormalization(),
+        keras.layers.MaxPool2D(pool_size=(3,3), strides=(2,2)),
+        keras.layers.Conv2D(name='conv2', filters=256, kernel_size=(5,5), strides=1, activation='relu', padding="same", groups=2),
+        keras.layers.BatchNormalization(),
+        keras.layers.MaxPool2D(pool_size=(3,3), strides=(2,2)),
+        keras.layers.Conv2D(name='conv3', filters=384, kernel_size=(3,3), strides=(1,1), activation='relu', padding="same"),
+        keras.layers.BatchNormalization(),
+        keras.layers.Conv2D(name='conv4', filters=384, kernel_size=(3,3), strides=(1,1), activation='relu', padding="same", groups=2),
+        keras.layers.BatchNormalization(),
+        keras.layers.Conv2D(name='conv5', filters=256, kernel_size=(3,3), strides=(1,1), activation='relu', padding="same", groups=2),
+        keras.layers.BatchNormalization(),
+        keras.layers.MaxPool2D(pool_size=(3,3), strides=(2,2)),
+        keras.layers.Flatten(),
+        keras.layers.Dense(4096, name='fc6', activation='relu'),
+        keras.layers.Dropout(0.5),
+        keras.layers.Dense(4096, name='fc7', activation='relu'),
+        keras.layers.Dropout(0.5),
+        keras.layers.Dense(NUMBER_OF_CLASSES, name='fc8', activation='softmax')
+    ])
+
+#creating the model
+model = AlexNet()
+
+net_data = np.load(open("bvlc_alexnet.npy", "rb"), encoding="latin1", allow_pickle=True).item()

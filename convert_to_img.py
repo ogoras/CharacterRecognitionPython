@@ -106,23 +106,28 @@ def convert_directory(in_dir, out_dir, dirname):
         minimum_y = (math.inf)
         
         stroke_index = 0
-        for line in f.readlines():
-            line = line[:-1]
-            if line == '':
-                strokes.append([])
-                stroke_index += 1
-                continue
-            coords = line.split(' ')
-#transformacje związane z obróceniem tablicy w środowisku (powinno być trochę bardziej elegancko :?)
-            strokes[stroke_index].append([float(coords[0]), -float(coords[1])])
-            if (maximum_x < float(coords[0])):
-                maximum_x = float(coords[0])
-            if (maximum_y < -float(coords[1])):
-                maximum_y = -float(coords[1])
-            if (minimum_x > float(coords[0])):
-                minimum_x = float(coords[0])
-            if (minimum_y > -float(coords[1])):
-                minimum_y = -float(coords[1])
+        try:
+            for line in f.readlines():
+                line = line[:-1]
+                if line == '':
+                    strokes.append([])
+                    stroke_index += 1
+                    continue
+                coords = line.split(' ')
+    #transformacje związane z obróceniem tablicy w środowisku (powinno być trochę bardziej elegancko :?)
+                strokes[stroke_index].append([float(coords[0]), -float(coords[1])])
+                if (maximum_x < float(coords[0])):
+                    maximum_x = float(coords[0])
+                if (maximum_y < -float(coords[1])):
+                    maximum_y = -float(coords[1])
+                if (minimum_x > float(coords[0])):
+                    minimum_x = float(coords[0])
+                if (minimum_y > -float(coords[1])):
+                    minimum_y = -float(coords[1])
+        except UnicodeDecodeError:
+            #print UnicodeDecodeError message in red
+            print("\033[91m" + "UnicodeDecodeError in file " + filename + "\033[0m")
+            continue
         
         imrange = imside - 2*padding
         

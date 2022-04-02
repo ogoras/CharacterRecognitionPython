@@ -56,6 +56,12 @@ parser.add_argument("--dataset", "-d", help="dataset to use",
     choices=dataset_options.keys(), default="full_dataset")
 parser.add_argument("--input", "-i", help="dataset folder",
     default="data/images")
+parser.add_argument("--epochs", "-e", help="number of epochs",
+    default=50)
+parser.add_argument("--debug", "-d", help="debug mode",
+    action="store_true")
+parser.add_argument("--analyze", "-a", help="analyze results",
+    action="store_true")
 args = parser.parse_args()
 
 dataset = list(dataset_options[args.dataset])
@@ -243,5 +249,107 @@ for img, lbl in zip(train_images, train_labels):
     train_images_processed.append(i)
 train_images_processed = np.array( train_images_processed )
 
-history = new_model_transfer.fit(datagen.flow(train_images_processed, train_labels, batch_size=16), epochs=50, validation_data=validation_ds,
+history = new_model_transfer.fit(datagen.flow(train_images_processed, train_labels, batch_size=16), epochs=args.epochs, validation_data=validation_ds,
           validation_freq=1)
+
+if(args.analyze):
+    f,ax = plt.subplots(1,2, dpi=150, figsize=(9,3))
+    ax[0].plot(history.history['loss'], label='Test Loss')
+    ax[0].plot(history.history['val_loss'], label='Validate Loss')
+    ax[0].set_title("Loss")
+    ax[0].legend()
+    ax[1].plot(history.history['accuracy'], label='Test Accuracy')
+    ax[1].plot(history.history['val_accuracy'], label='Validate Accuracy')
+    ax[1].set_title("Accuracy")
+    ax[1].legend()
+
+
+    new_model_transfer.evaluate(test_ds)
+
+    new_model.predict(test_ds)
+
+    def debug(msg):
+        if (args.debug):
+            print(msg)
+
+    images = []
+    y_true = []
+    y_pred = []
+    for batch in test_ds:
+        pred = new_model_transfer.predict(batch[0])
+        print(batch[1])
+        print(pred)
+        for idx, (prawdopodobienstwo, oczekiwane) in enumerate(zip(pred, batch[1])):
+            debug(f"oczekiwana: {oczekiwane} obliczona : {np.argmax(prawdopodobienstwo)}")
+
+            images.append(batch[0][idx,:,:,:]) # zapamietaj skojarzony obrazek
+            y_true.append(oczekiwane)          # zapamiętaj wartosć rzeczywistą
+            y_pred.append(np.argmax(prawdopodobienstwo)) # zapamiętaj pozycję z największym prawdopodobieństwem
+
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
+
+    confusion_matrix(y_pred, y_true)
+
+    print(classification_report(y_pred, y_true))
+
+    blednie_sklasyfikowane = np.where( y_true != y_pred )
+
+    idx = np.where( y_true == 0 )
+    y_true_hot_one = np.zeros( (y_true.shape[0], numClasses) )
+    for idx, c in enumerate(y_true):
+        y_true_hot_one[idx, c] = 1.0
+
+    y_pred_keras = new_model_transfer.predict((np.array(images)))
+
+    print(f"Rozmiar macierzy zawierającego zawierającej prawdopodobieństwa przynależności do danej klasy: {y_pred_keras.shape}")
+    print(f"{'-'*110}")
+
+    res = []
+    print("Klasy oczekiwane, oraz prawdopodobieństwa obliczone dla maksymalnej klasy w formie listy.")
+    for y_t, y_p in zip(y_true, y_pred_keras):
+        y_p_sorted = np.sort(y_p)
+        res.append( (y_t, np.argmax(y_p), y_p_sorted[-1], y_p_sorted[-2]) )
+        #print(f"Klasa rzeczywista: {y_t:4}, Klasa obliczona (nr maksymalnego P_max): {np.argmax(y_p)}, P_max: {y_p_sorted[-1]:.2f}, P_max_2: {y_p_sorted[-2]:.2f}")
+
+    # używamy Pandas i Dataframe tylko po to aby ładnie wyświetlić wyniki    
+    df = pd.DataFrame(data=res, columns=["Klasa rzeczywista", "Klasa obliczona (nr. max. P_max)", "P_max", "P_max_2"])
+    pd.set_option('display.max_rows', 100)
+    df = df.sort_values("Klasa rzeczywista")
+    display(df)
+
+    plt.figure(1, dpi=200)
+    for i in range(numClasses):
+        if (np.sum(y_true_hot_one[:,i]) > 0):
+            fpr_keras, tpr_keras, thresholds_keras = roc_curve(y_true_hot_one[:,i], y_pred_keras[:,i])
+            auc_keras = auc(fpr_keras, tpr_keras)
+            print(f"AUC dla klasy: {i+1}: {auc_keras}")
+
+            plt.plot(fpr_keras, tpr_keras, label=f'Klasa {i+1} (size: {np.sum(y_true_hot_one[:,i]).astype(np.uint)}) (auc = {auc_keras:.3f})')
+
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.xlabel('False positive rate')
+    plt.ylabel('True positive rate')
+    plt.title('ROC curve')
+    plt.legend(loc='best')
+    plt.show()
+
+    # ROC zbiorczy
+
+    y_pred_keras = new_model_transfer.predict((np.array(images)))
+    y_pred_keras.shape
+
+    plt.rc('font', size=6) 
+    plt.figure(1, dpi=200)
+    fpr_keras, tpr_keras, thresholds_keras = roc_curve(y_true_hot_one.ravel(), y_pred_keras.ravel())
+    auc_keras = auc(fpr_keras, tpr_keras)
+    print(f"AUC zbiorczy: {auc_keras}")
+
+    plt.plot(fpr_keras, tpr_keras, label=f'(size: {len(y_true)}) (auc = {auc_keras:.3f})')
+
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.xlabel('False positive rate')
+    plt.ylabel('True positive rate')
+    plt.title('Krzywa ROC - zbiorcza')
+    plt.legend(loc='best')
+    plt.show()

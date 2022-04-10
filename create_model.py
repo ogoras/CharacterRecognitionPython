@@ -52,7 +52,7 @@ dataset_options = { "numbers": numbers,
 
 #get --dataset or -d argument
 parser = argparse.ArgumentParser()
-parser.add_argument("--dataset", "-d", help="dataset to use",
+parser.add_argument("--dataset", "-s", help="dataset to use",
     choices=dataset_options.keys(), default="full_dataset")
 parser.add_argument("--input", "-i", help="dataset folder",
     default="data/images")
@@ -64,6 +64,7 @@ parser.add_argument("--analyze", "-a", help="analyze results",
     action="store_true")
 parser.add_argument("--output", "-o", help="output file",
     default="models/model" + time.strftime("%Y%m%d-%H%M%S") + ".h5")
+parser.add_argument("--subject", "-n", help="subject number for a specialized model")
 args = parser.parse_args()
 
 dataset = list(dataset_options[args.dataset])
@@ -128,7 +129,8 @@ def read_images(folder=dataset_folder):
 
                 # convert to numpy array
                 img_array = img_to_array(img)
-                # print(img_array.shape)
+                if (args.debug and img_array.shape != (28,28,3)):
+                    print(img_array.shape)
                 images_list.append(img_array)
                 target_list.append(list(dataset).index(sub))
 
@@ -140,10 +142,13 @@ images, labels = read_images()
 
 print_green(str(images.shape[0]) + " images loaded")
 
-from sklearn.model_selection import train_test_split
-
 train_images, test_images, train_labels, test_labels = train_test_split(images, labels, test_size=0.2)
 train_images, validation_images, train_labels, validation_labels = train_test_split(train_images, train_labels, test_size=0.2)
+
+if(args.debug):
+    print_green(f"Rozmiar danych uczących:      {train_images.shape}")
+    print_green(f"Rozmiar danych walidujących:  {validation_images.shape}")
+    print_green(f"Rozmiar danych testujących:   {test_images.shape}")
 
 train_ds = tf.data.Dataset.from_tensor_slices( (train_images, train_labels) )
 test_ds =  tf.data.Dataset.from_tensor_slices( (test_images, test_labels) )
@@ -251,8 +256,14 @@ for img, lbl in zip(train_images, train_labels):
     train_images_processed.append(i)
 train_images_processed = np.array( train_images_processed )
 
+if(args.debug):
+    print_green("Train images shape: " + str(train_images_processed.shape))
+
 history = new_model_transfer.fit(datagen.flow(train_images_processed, train_labels, batch_size=16), epochs=args.epochs, validation_data=validation_ds,
-          validation_freq=1)
+         validation_freq=1)
+
+#history = new_model_transfer.fit(train_ds, epochs=args.epochs, validation_data=validation_ds,
+#          validation_freq=1)
 
 #save the model to the file
 new_model_transfer.save(args.output)

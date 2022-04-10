@@ -92,7 +92,7 @@ def convert_directory(in_dir, out_dir, dirname):
         pass
     for filename in os.listdir(directory):
         out_filename = directory2 + "/" + filename
-        out_filename = out_filename.replace(".txt",".png")
+        out_filename = out_filename.replace(".txt",".jpg")
         filename = directory + "/" + filename
         if os.path.exists(out_filename):
             continue

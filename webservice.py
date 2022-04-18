@@ -9,8 +9,10 @@ app.config["DEBUG"] = True
 @app.route('/', methods=['POST'])
 def classify():
     request_data = request.get_json()
-    print(request_data["data"])
-    img = convert_to_img([[[dict['x'],dict['y']] for dict in stroke] for stroke in request_data["data"]])
+    data = [[[dict['x'], -dict['y']] for dict in stroke] for stroke in request_data["data"]]
+    print(data)
+    img = convert_to_img(data)
+    img.show()
     return 'not implemented'
 
 if __name__ == '__main__':

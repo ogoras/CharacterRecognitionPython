@@ -78,8 +78,58 @@ def evaluate_bezier(points, n):
     curves = get_bezier_cubic(points)
     return np.array([fun(t) for fun in curves for t in np.linspace(0, 1, n)])
 
+def convert_to_img(strokes):
+    imrange = imside - 2*padding
 
+    minimum_x = (math.inf)
+    minimum_y = (math.inf)
+    maximum_x = (-math.inf)
+    maximum_y = (-math.inf)
 
+    for stroke in strokes:
+        for point in stroke:
+            if (point[0] < minimum_x):
+                minimum_x = point[0]
+            if (point[0] > maximum_x):
+                maximum_x = point[0]
+            if (point[1] < minimum_y):
+                minimum_y = point[1]
+            if (point[1] > maximum_y):
+                maximum_y = point[1]
+        
+    range_x = maximum_x - minimum_x
+    range_y = maximum_y - minimum_y
+
+    maxrange = max(range_x , range_y)
+    if maxrange == 0:
+        normalized_strokes = [[[imside/2, imside/2]]]
+    else:
+        ratio =  min(range_x, range_y) / maxrange
+
+        if (range_x > range_y):
+            normalized_strokes = [[[(vector[0]-minimum_x)*imrange/maxrange + padding, 
+                            (vector[1]-minimum_y)*imrange/maxrange + padding + imrange*(1-ratio)/2] 
+                                    for vector in stroke] for stroke in strokes]
+        else:
+            normalized_strokes = [[[(vector[0]-minimum_x)*imrange/maxrange + padding + imrange*(1-ratio)/2,
+                            (vector[1]-minimum_y)*imrange/maxrange + padding] for vector in stroke] for stroke in strokes]
+    
+    img = 255 * np.zeros([imside,imside], dtype=np.uint8)
+
+    for normed_stroke in normalized_strokes:
+        if (len(normed_stroke) == 0):
+            continue
+        if (len(normed_stroke) == 1):
+            draw_dot(img, int(normed_stroke[0][0]), int(normed_stroke[0][1]))
+        else:    
+            path = evaluate_bezier(np.array(normed_stroke), 50)
+            px, py = path[:,0], path[:,1]
+            n = len(px)
+            for index in range(n):
+                draw_dot(img, int(px[index]), int(py[index]))
+    
+    im = Image.fromarray(img)
+    return im
 
 def convert_directory(in_dir, out_dir, dirname):
     if dirname[0] == '.':
@@ -129,40 +179,7 @@ def convert_directory(in_dir, out_dir, dirname):
             print("\033[91m" + "UnicodeDecodeError in file " + filename + "\033[0m")
             continue
         
-        imrange = imside - 2*padding
-        
-        range_x = maximum_x - minimum_x
-        range_y = maximum_y - minimum_y
-
-        maxrange = max(range_x , range_y)
-        if maxrange == 0:
-            normalized_strokes = [[[imside/2, imside/2]]]
-        else:
-            ratio =  min(range_x, range_y) / maxrange
-    
-            if (range_x > range_y):
-                normalized_strokes = [[[(vector[0]-minimum_x)*imrange/maxrange + padding, 
-                               (vector[1]-minimum_y)*imrange/maxrange + padding + imrange*(1-ratio)/2] 
-                                       for vector in stroke] for stroke in strokes]
-            else:
-                normalized_strokes = [[[(vector[0]-minimum_x)*imrange/maxrange + padding + imrange*(1-ratio)/2,
-                               (vector[1]-minimum_y)*imrange/maxrange + padding] for vector in stroke] for stroke in strokes]
-        
-        img = 255 * np.zeros([imside,imside], dtype=np.uint8)
-    
-        for normed_stroke in normalized_strokes:
-            if (len(normed_stroke) == 0):
-                continue
-            if (len(normed_stroke) == 1):
-                draw_dot(img, int(normed_stroke[0][0]), int(normed_stroke[0][1]))
-            else:    
-                path = evaluate_bezier(np.array(normed_stroke), 50)
-                px, py = path[:,0], path[:,1]
-                n = len(px)
-                for index in range(n):
-                    draw_dot(img, int(px[index]), int(py[index]))
-        
-        im = Image.fromarray(img)
+        im = convert_to_img(strokes)
         im.save(out_filename)
     print("Directory " + dirname + " finished conversion.")
 

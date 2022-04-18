@@ -167,10 +167,11 @@ def convert_directory(in_dir, out_dir, dirname):
     print("Directory " + dirname + " finished conversion.")
 
 
-for sub_dirname in os.listdir(in_root_dir):
-    try:
-        os.makedirs(out_root_dir + sub_dirname)
-    except FileExistsError:
-        pass
-    for dirname in os.listdir(in_root_dir + sub_dirname):
-        convert_directory(in_root_dir + sub_dirname + "/", out_root_dir + sub_dirname + "/", dirname)
+if __name__ == "__main__":
+    for sub_dirname in os.listdir(in_root_dir):
+        try:
+            os.makedirs(out_root_dir + sub_dirname)
+        except FileExistsError:
+            pass
+        for dirname in os.listdir(in_root_dir + sub_dirname):
+            convert_directory(in_root_dir + sub_dirname + "/", out_root_dir + sub_dirname + "/", dirname)

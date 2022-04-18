@@ -63,7 +63,7 @@ parser.add_argument("--debug", "-d", help="debug mode",
 parser.add_argument("--analyze", "-a", help="analyze results",
     action="store_true")
 parser.add_argument("--output", "-o", help="output file",
-    default="models/model" + time.strftime("%Y%m%d-%H%M%S") + ".h5")
+    default="model" + time.strftime("%Y%m%d-%H%M%S") + ".h5")
 parser.add_argument("--subject", "-n", help="subject number for a specialized model")
 args = parser.parse_args()
 
@@ -266,7 +266,7 @@ history = new_model_transfer.fit(datagen.flow(train_images_processed, train_labe
 #          validation_freq=1)
 
 #save the model to the file
-new_model_transfer.save(args.output)
+new_model_transfer.save(os.path.join("models/", args.output))
 
 if(args.analyze):
     f,ax = plt.subplots(1,2, dpi=150, figsize=(9,3))
@@ -332,7 +332,7 @@ if(args.analyze):
     df = pd.DataFrame(data=res, columns=["Klasa rzeczywista", "Klasa obliczona (nr. max. P_max)", "P_max", "P_max_2"])
     pd.set_option('display.max_rows', 100)
     df = df.sort_values("Klasa rzeczywista")
-    display(df)
+    print(df)
 
     plt.figure(1, dpi=200)
     for i in range(numClasses):

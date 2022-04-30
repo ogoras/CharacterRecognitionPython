@@ -17,6 +17,8 @@ def classify():
     img = convert_to_img(data)
     #scale image to 227x227
     img = img.resize((227, 227))
+    #convert to RGB
+    img = img.convert('RGB')
     img = np.array(img)
     img = img.reshape(1, 227, 227, 3)
     model_filename = "models/model20220418-174527.h5"

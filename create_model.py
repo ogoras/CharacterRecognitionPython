@@ -9,50 +9,11 @@ import time
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from classno_conversions import classno_to_char, classno_to_charname
 
 #print in green
 def print_green(text):
     print("\033[92m", text, "\033[0m")
-
-def classno_to_char(ind):
-    polish_letters = list("ĄĆĘŁŃÓŚŹŻ")
-    polish_miniscule_letters = list("ąćęłńóśźż")
-    
-    if ind < 10:
-        return str(ind)
-    elif ind < 36:
-        return chr(ord('A') + ind - 10)
-    elif ind < 45:
-        return polish_letters[ind - 36]
-    elif ind < 71:
-        return chr(ord('a') + ind - 45)
-    elif ind < 80:
-        return polish_miniscule_letters[ind - 71]
-    elif ind < 95:
-        return chr(ord('!') + ind - 80)
-    elif ind < 102:
-        return chr(ord(':') + ind - 95)
-    elif ind < 108:
-        return chr(ord('[') + ind - 102)
-    elif ind < 112:
-        return chr(ord('{') + ind - 108)
-    elif ind == 112:
-        return ' '
-    elif ind == 113:
-        return '\t'
-    else:
-        return "\n"
-
-def classno_to_charname(ind):
-    char = classno_to_char(ind)
-    if char == ' ':
-        return 'space'
-    elif char == '\t':
-        return 'tab'
-    elif char == '\n':
-        return 'newline'
-    else:
-        return char
 
 if __name__ == '__main__':
     numbers = range(10)

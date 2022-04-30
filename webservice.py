@@ -3,7 +3,7 @@ import flask
 from flask import request
 from convert_to_img import convert_to_img
 from predict_image import predict_image
-from create_model import classno_to_charname
+from classno_conversions import classno_to_charname
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True

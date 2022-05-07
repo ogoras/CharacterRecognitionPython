@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def classno_to_char(ind):
     polish_letters = list("ĄĆĘŁŃÓŚŹŻ")
     polish_miniscule_letters = list("ąćęłńóśźż")
@@ -25,7 +26,7 @@ def classno_to_char(ind):
     elif ind == 113:
         return '\t'
     else:
-        return "\n"
+        return '\r\n'
 
 def classno_to_charname(ind):
     char = classno_to_char(ind)
@@ -33,7 +34,7 @@ def classno_to_charname(ind):
         return 'space'
     elif char == '\t':
         return 'tab'
-    elif char == '\n':
+    elif char == '\r\n':
         return 'newline'
     else:
         return char

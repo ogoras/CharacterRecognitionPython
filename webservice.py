@@ -3,7 +3,7 @@ import flask
 from flask import request
 from convert_to_img import convert_to_img
 from predict_image import predict_image
-from classno_conversions import classno_to_charname
+from classno_conversions import classno_to_charname, classno_to_char
 import numpy as np
 
 app = flask.Flask(__name__)
@@ -23,7 +23,7 @@ def classify():
     img = img.reshape(1, 227, 227, 3)
     model_filename = "models/model20220418-174527.h5"
     class_no = predict_image(img, model_filename)
-    return classno_to_charname(class_no)
+    return classno_to_char(class_no)
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080, host="0.0.0.0")

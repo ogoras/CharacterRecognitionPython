@@ -230,8 +230,8 @@ if __name__ == '__main__':
     if(args.debug):
         print_green("Train images shape: " + str(train_images_processed.shape))
 
-    # history = new_model_transfer.fit(datagen.flow(train_images_processed, train_labels, batch_size=16), epochs=args.epochs, validation_data=validation_ds,
-    #         validation_freq=1)
+    history = new_model_transfer.fit(datagen.flow(train_images_processed, train_labels, batch_size=16), epochs=args.epochs, validation_data=validation_ds,
+            validation_freq=1)
 
     #history = new_model_transfer.fit(train_ds, epochs=args.epochs, validation_data=validation_ds,
     #          validation_freq=1)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from itertools import chain
 import argparse
 import numpy as np

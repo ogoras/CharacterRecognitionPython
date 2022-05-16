@@ -73,6 +73,10 @@ if __name__ == '__main__':
     dataset = list(dataset_options[args.dataset])
     dataset_folder = args.input
 
+    def debug(msg):
+        if (args.debug):
+            print(msg)
+
     def read_images(folder=dataset_folder):
         from keras.preprocessing.image import load_img
         from keras.preprocessing.image import img_to_array
@@ -81,7 +85,11 @@ if __name__ == '__main__':
         target_list=[]
 
         for subfolder in os.listdir(folder):
+            #if args.subject set, then pass all other subjects
+            if args.subject and subfolder != "sub" + str(args.subject):
+                continue
             for sub in dataset:
+                debug("Reading images from " + subfolder + "/" + str(sub))
                 #if directory does not exist, continue
                 if not os.path.isdir(os.path.join(folder, subfolder, str(sub))):
                     continue
@@ -222,14 +230,19 @@ if __name__ == '__main__':
     if(args.debug):
         print_green("Train images shape: " + str(train_images_processed.shape))
 
-    history = new_model_transfer.fit(datagen.flow(train_images_processed, train_labels, batch_size=16), epochs=args.epochs, validation_data=validation_ds,
-            validation_freq=1)
+    # history = new_model_transfer.fit(datagen.flow(train_images_processed, train_labels, batch_size=16), epochs=args.epochs, validation_data=validation_ds,
+    #         validation_freq=1)
 
     #history = new_model_transfer.fit(train_ds, epochs=args.epochs, validation_data=validation_ds,
     #          validation_freq=1)
 
-    #save the model to the file
-    new_model_transfer.save(os.path.join("models/", args.output))
+    #save the model to the file in models folder if args.subject is not set
+    if(args.subject == None):
+        new_model_transfer.save(os.path.join("models/", args.output))
+        debug("Model saved to " + os.path.join("models/", args.output))
+    else:
+        new_model_transfer.save(os.path.join("models/", "sub" + str(args.subject), args.output))
+        debug("Model saved to " + os.path.join("models/", "sub" + str(args.subject), args.output))
 
     if(args.analyze):
         f,ax = plt.subplots(1,2, dpi=150, figsize=(9,3))
@@ -246,10 +259,6 @@ if __name__ == '__main__':
         new_model_transfer.evaluate(test_ds)
 
         new_model.predict(test_ds)
-
-        def debug(msg):
-            if (args.debug):
-                print(msg)
 
         images = []
         y_true = []
